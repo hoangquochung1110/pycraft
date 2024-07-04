@@ -1,5 +1,4 @@
-from tokenizer import Token
-from tokentype import TokenType
+from tokenclass import TokenType, Token
 from error_handler import ErrorHandler
 
 
