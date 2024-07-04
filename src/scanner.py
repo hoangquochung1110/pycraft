@@ -139,7 +139,7 @@ class Scanner:
         while self.peek().isalnum():
             self.advance()
 
-        text = self.source[self._start : self._current]
+        self.add_token(TokenType.IDENTIFIER)
 
     def _isAtEnd(self):
         return self._current >= len(self.source)
