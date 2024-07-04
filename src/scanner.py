@@ -3,12 +3,32 @@ from error_handler import ErrorHandler
 
 
 class Scanner:
+
+    _keywords = {
+        "and": TokenType.AND,
+        "class": TokenType.CLASS,
+        "else": TokenType.ELSE,
+        "false": TokenType.FALSE,
+        "for": TokenType.FOR,
+        "fun": TokenType.FUN,
+        "if": TokenType.IF,
+        "nil": TokenType.NIL,
+        "or": TokenType.OR,
+        "print": TokenType.PRINT,
+        "return": TokenType.RETURN,
+        "super": TokenType.SUPER,
+        "this": TokenType.THIS,
+        "true": TokenType.TRUE,
+        "var": TokenType.VAR,
+        "while": TokenType.WHILE,
+    }
+
     def __init__(self, source, error_handler: ErrorHandler) -> None:
         self.source = source
         self.tokens: list[Token] = []
         self.error_handler = error_handler
-        self._start = 0
-        self._current = 0
+        self._start = 0  # points to the first character in the lexeme being scanned
+        self._current = 0  # points at the character currently being considered
         self._line = 1
 
     def scan_tokens(self):
@@ -111,7 +131,7 @@ class Scanner:
             if self.peek() == "\n":
                 self._line += 1
             self.advance()
-        
+
         if self._isAtEnd():
             self.error_handler.error(self._line, "Unterminated string.")
             return
@@ -122,7 +142,7 @@ class Scanner:
         # trim the surrounding "
         value = self.source[self._start + 1 : self._current - 1]
         self.add_token(TokenType.STRING, value)
-    
+
     def number(self):
         while self.peek().isdigit():
             self.advance()
@@ -137,8 +157,11 @@ class Scanner:
     def identifier(self):
         while self.peek().isalnum():
             self.advance()
-
-        self.add_token(TokenType.IDENTIFIER)
+        text = self.source[self._start : self._current]
+        type = self._keywords.get(text)
+        if type is None:
+            type = TokenType.IDENTIFIER
+        self.add_token(type)
 
     def _isAtEnd(self):
         return self._current >= len(self.source)
@@ -154,12 +177,12 @@ class Scanner:
     def advance(self):
         self._current += 1
         return self.source[self._current - 1]
-    
+
     def peek(self):
         if self._isAtEnd():
             return "\0"
         return self.source[self._current]
-    
+
     def peek_next(self):
         if self._current + 1 >= len(self.source):
             return "\0"
