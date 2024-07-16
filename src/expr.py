@@ -1,3 +1,5 @@
+from tokenclass import Token
+
 class Expr:
 
     def accept(self):
@@ -30,7 +32,7 @@ class Literal(Expr):
 
 class Grouping(Expr):
 
-    def __init__(self, expression):
+    def __init__(self, expression: Expr):
         self.expression = expression
 
     def accept(self, visitor: ExprVisitor):
@@ -40,7 +42,7 @@ class Grouping(Expr):
 
 class Unary(Expr):
 
-    def __init__(self, operator, right):
+    def __init__(self, operator: Token, right: Expr):
         self.operator = operator
         self.right = right
 
@@ -50,7 +52,7 @@ class Unary(Expr):
 
 class Binary(Expr):
 
-    def __init__(self, left, operator, right):
+    def __init__(self, left: Expr, operator: Token, right: Expr):
         self.left = left
         self.operator = operator
         self.right = right
