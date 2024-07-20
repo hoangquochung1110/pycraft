@@ -2,7 +2,7 @@ from tokenclass import Token
 
 class Expr:
 
-    def accept(self):
+    def accept(self, visitor: "ExprVisitor"):
         return NotImplemented()
 
 
