@@ -1,5 +1,5 @@
-from tokenclass import TokenType, Token
-from error_handler import ErrorHandler
+from .tokenclass import TokenType, Token
+from .error_handler import ErrorHandler
 
 
 class Scanner:
@@ -110,7 +110,7 @@ class Scanner:
             return
 
         elif c == '"':
-            self._string()
+            self.string()
             return
 
         else:
@@ -119,7 +119,10 @@ class Scanner:
             elif c.isalpha():
                 self.identifier()
             else:
-                self.error_handler.error(self._line, "Unexpected character.")
+                self.error_handler.error(
+                    line=self._line,
+                    message="Unexpected character.",
+                )
             return
 
     def add_token(self, token_type, literal=None):
