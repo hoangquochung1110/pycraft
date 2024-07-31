@@ -1,0 +1,2 @@
+# Pytest for running the tests.
+pytest>=7.0.1,<8.0
