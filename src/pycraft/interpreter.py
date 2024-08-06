@@ -15,6 +15,7 @@ class Interpreter(ExprVisitor):
 
         match expr.operator.type:
             case TokenType.MINUS:
+                self._check_number_operand(expr.operator, right)
                 return -right
             case TokenType.BANG:
                 return not self._is_truthy(right)
@@ -25,18 +26,36 @@ class Interpreter(ExprVisitor):
         right = self.evaluate(expr.right)
 
         match expr.operator.type:
-            case TokenType.MINUS: return float(left) - float(right)
-            case TokenType.SLASH: return float(left) / float(right)
-            case TokenType.STAR: return float(left) * float(right)
+            case TokenType.MINUS:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) - float(right)
+            case TokenType.SLASH:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) / float(right)
+            case TokenType.STAR:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) * float(right)
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
                     return left + right
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
-            case TokenType.GREATER: return float(left) > float(right)
-            case TokenType.GREATER_EQUAL: return float(left) >= float(right)
-            case TokenType.LESS: return float(left) < float(right)
-            case TokenType.LESS_EQUAL: return float(left) <= float(right)
+                raise RuntimeError(
+                    expr.operator,
+                    "Operands must be two numbers or two strings.",
+                )
+            case TokenType.GREATER:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) > float(right)
+            case TokenType.GREATER_EQUAL:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) >= float(right)
+            case TokenType.LESS:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) < float(right)
+            case TokenType.LESS_EQUAL:
+                self._check_number_operands(expr.operator, left, right)
+                return float(left) <= float(right)
             case TokenType.BANG_EQUAL: return not self._is_equal(left, right)
             case TokenType.EQUAL_EQUAL: return self._is_equal(left, right)
 
@@ -63,3 +82,17 @@ class Interpreter(ExprVisitor):
         if a is None:
             return False
         return a == b
+
+    def _check_number_operand(self, operator, operand):
+        if isinstance(operand, float):
+            return
+        raise RuntimeError(
+            operator, "Operand must be a number.",
+        )
+
+    def _check_number_operands(self, operator, left, right):
+        if isinstance(left, float) and isinstance(right, float):
+            return
+        raise RuntimeError(
+            operator, "Operands must be numbers.",
+        )
