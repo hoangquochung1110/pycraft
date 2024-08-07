@@ -1,8 +1,20 @@
 from .expr import ExprVisitor, Binary, Grouping, Literal, Expr, Unary
 from .tokenclass import TokenType
+from .error_handler import ErrorHandler
+from .exception import LoxRuntimeError
 
 
 class Interpreter(ExprVisitor):
+
+    def __init__(self, error_handler: ErrorHandler):
+        self.error_handler = error_handler
+
+    def interpret(self, expr: Expr):
+        try:
+            value = self.evaluate(expr)
+            print(value)
+        except LoxRuntimeError as error:
+            self.error_handler.runtime_error(error=error)
 
     def visit_literal_expr(self, expr: Literal):
         return expr.value
@@ -83,16 +95,26 @@ class Interpreter(ExprVisitor):
             return False
         return a == b
 
+    def _stringify(self, obj) -> str:
+        if obj is None:
+            return "nil"
+        if isinstance(obj, float):
+            text = str(obj)
+            if text.endswith(".0"):
+                text = text[:-2]
+            return text
+        return str(obj)
+
     def _check_number_operand(self, operator, operand):
         if isinstance(operand, float):
             return
-        raise RuntimeError(
+        raise LoxRuntimeError(
             operator, "Operand must be a number.",
         )
 
     def _check_number_operands(self, operator, left, right):
         if isinstance(left, float) and isinstance(right, float):
             return
-        raise RuntimeError(
+        raise LoxRuntimeError(
             operator, "Operands must be numbers.",
         )
