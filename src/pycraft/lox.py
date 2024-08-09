@@ -3,12 +3,14 @@ from .ast_printer import ASTPrinter
 from .error_handler import ErrorHandler
 from .parser import Parser
 from .scanner import Scanner
+from .interpreter import Interpreter
 
 
 class Lox:
 
     def __init__(self) -> None:
         self.error_handler = ErrorHandler()
+        self._interpreter = Interpreter()
 
     def run_file(self, path):
         with open(path, "rt", encoding="utf-8") as f:
@@ -36,7 +38,7 @@ class Lox:
         if self.error_handler.had_error():
             return
 
-        print(ASTPrinter().print(expr))
+        self._interpreter.interpret(expr=expr)
 
     def had_error(self):
         return self.error_handler.had_error()
