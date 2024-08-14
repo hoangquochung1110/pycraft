@@ -10,7 +10,7 @@ class Lox:
 
     def __init__(self) -> None:
         self.error_handler = ErrorHandler()
-        self._interpreter = Interpreter()
+        self._interpreter = Interpreter(error_handler=self.error_handler)
 
     def run_file(self, path):
         with open(path, "rt", encoding="utf-8") as f:
