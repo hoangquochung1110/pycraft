@@ -52,6 +52,8 @@ class Interpreter(ExprVisitor):
                     return left + right
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
+                if isinstance(left, str) or isinstance(right, str):
+                    return self._stringify(left) + self._stringify(right)
                 raise RuntimeError(
                     expr.operator,
                     "Operands must be two numbers or two strings.",
