@@ -1,5 +1,5 @@
-from .tokenclass import TokenType, Token
 from .error_handler import ErrorHandler
+from .tokenclass import Token, TokenType
 
 
 class Scanner:

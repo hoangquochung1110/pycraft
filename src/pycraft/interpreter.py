@@ -1,7 +1,7 @@
-from .expr import ExprVisitor, Binary, Grouping, Literal, Expr, Unary
-from .tokenclass import TokenType
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
+from .expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
+from .tokenclass import TokenType
 
 
 class Interpreter(ExprVisitor):

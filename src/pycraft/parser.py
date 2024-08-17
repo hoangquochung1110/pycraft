@@ -1,4 +1,4 @@
-from .expr import Binary, Expr, Grouping, Unary, Literal
+from .expr import Binary, Expr, Grouping, Literal, Unary
 from .tokenclass import Token, TokenType
 
 

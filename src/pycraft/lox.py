@@ -1,9 +1,10 @@
 import sys
+
 from .ast_printer import ASTPrinter
 from .error_handler import ErrorHandler
+from .interpreter import Interpreter
 from .parser import Parser
 from .scanner import Scanner
-from .interpreter import Interpreter
 
 
 class Lox:
@@ -45,4 +46,3 @@ class Lox:
 
     def had_runtime_error(self):
         return self.error_handler.had_runtime_error
-

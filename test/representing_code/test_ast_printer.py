@@ -1,5 +1,5 @@
 from pycraft.ast_printer import ASTPrinter
-from pycraft.expr import Expr, Binary, Grouping, Literal, Unary
+from pycraft.expr import Binary, Expr, Grouping, Literal, Unary
 from pycraft.tokenclass import Token, TokenType
 
 

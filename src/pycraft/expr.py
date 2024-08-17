@@ -1,5 +1,6 @@
 from .tokenclass import Token
 
+
 class Expr:
 
     def accept(self, visitor: "ExprVisitor"):

@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 TokenType = Enum(
     "TokenType",
     "LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, \

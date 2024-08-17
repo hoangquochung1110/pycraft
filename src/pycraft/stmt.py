@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 from abc import ABC
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
 
 from .expr import Expr
-
 
 R = TypeVar('R')
 

@@ -1,4 +1,4 @@
-from .tokenclass import TokenType, Token
+from .tokenclass import Token, TokenType
 
 
 class ErrorHandler:
