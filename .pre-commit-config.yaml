@@ -1,0 +1,42 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: debug-statements
+
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        name: sort imports
+
+-   repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+    -   id: flake8
+        exclude: migrations|.venv|__init__.py|project4
+        stages: [push]
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.6.1
+    hooks:
+        # Run the formatter.
+    -   id: ruff-format
+        stages: [ push ]
+
+-   repo: local
+    hooks:
+    -   id: tests
+        name: run tests
+        entry: pytest
+        language: system
+        pass_filenames: false
+        types: [ python ]
+        stages: [ push ]
+
+ci:
+    autoupdate_schedule: 'weekly'
