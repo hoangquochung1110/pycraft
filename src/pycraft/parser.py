@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from .expr import Binary, Expr, Grouping, Literal, Unary
+from .stmt import Print, Stmt, StmtExpression
 from .tokenclass import Token, TokenType
 
 
@@ -10,10 +13,25 @@ class Parser:
         self.error_handler = error_handler
 
     def parse(self) -> "Expr":
-        try:
-            return self.expression()
-        except RuntimeError:
-            return None
+        statements: list[Stmt] = []
+        while not self.is_at_end():
+            statements.append(self.statement())
+        return statements
+
+    def statement(self) -> Stmt:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        return self.expression_statement()
+
+    def print_statement(self) -> Stmt:
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Print(value)
+
+    def expression_statement(self) -> Stmt:
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return StmtExpression(value)
 
     def expression(self) -> "Expr":
         return self.equality()
