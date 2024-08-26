@@ -12,7 +12,7 @@ class Parser:
         self.current = 0
         self.error_handler = error_handler
 
-    def parse(self) -> "Expr":
+    def parse(self) -> list[Stmt]:
         statements: list[Stmt] = []
         while not self.is_at_end():
             statements.append(self.statement())

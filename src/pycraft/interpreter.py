@@ -1,18 +1,21 @@
+from typing import Iterable
+
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
 from .expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
 from .tokenclass import TokenType
+from .stmt import StmtVisitor, Stmt, Print, StmtExpression
 
 
-class Interpreter(ExprVisitor):
+class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
 
-    def interpret(self, expr: Expr):
+    def interpret(self, statements: Iterable[Stmt]):
         try:
-            value = self.evaluate(expr)
-            print(value)
+            for stmt in statements:
+                self._execute(stmt)
         except LoxRuntimeError as error:
             self.error_handler.runtime_error(error=error)
 
@@ -78,6 +81,18 @@ class Interpreter(ExprVisitor):
 
         into interpreter's visitor implementation."""
         return expr.accept(self)
+
+    def _execute(self, stmt: Stmt):
+        stmt.accept(self)
+
+    def visit_expression_stmt(self, stmt: StmtExpression) -> None:
+        self.evaluate(stmt.expression)
+        return None
+
+    def visit_print_stmt(self, stmt: Print) -> None:
+        value = self.evaluate(stmt.expression)
+        self._stringify(value)
+        return None
 
     def _is_truthy(self, obj) -> bool:
         """Lox follows Ruby's simple rule: false and nil are falsey,
