@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from .expr import Binary, Expr, Grouping, Literal, Unary
-from .stmt import Print, Stmt, StmtExpression
+from .errors import ParseError
+from .expr import Binary, Expr, Grouping, Literal, Unary, VariableExpr
+from .stmt import Print, Stmt, StmtExpression, Var
 from .tokenclass import Token, TokenType
 
 
@@ -15,7 +16,7 @@ class Parser:
     def parse(self) -> list[Stmt]:
         statements: list[Stmt] = []
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
         return statements
 
     def statement(self) -> Stmt:
@@ -28,6 +29,15 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)
 
+    def var_declaration(self) -> Stmt:
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+        initializer: Expr = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Var(name, initializer)
+
     def expression_statement(self) -> Stmt:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
@@ -35,6 +45,15 @@ class Parser:
 
     def expression(self) -> "Expr":
         return self.equality()
+
+    def declaration(self) -> Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration()
+            return self.statement()
+        except ParseError:
+            self._synchronize()
+            return None
 
     def equality(self) -> "Expr":
         # equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -97,6 +116,8 @@ class Parser:
             return Literal(None)
         elif self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().literal)
+        elif self.match(TokenType.IDENTIFIER):
+            return VariableExpr(name=self.previous())
         elif self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(

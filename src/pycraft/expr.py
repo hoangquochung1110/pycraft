@@ -60,3 +60,12 @@ class Binary(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_binary_expr(self)
+
+
+class VariableExpr(Expr):
+
+    def __init__(self, name) -> None:
+        self.name = name
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_variable_expr(self)
