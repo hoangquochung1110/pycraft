@@ -1,16 +1,18 @@
 from typing import Iterable
 
+from .environment import Environment
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
-from .expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
+from .expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary, VariableExpr
+from .stmt import Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
-from .stmt import StmtVisitor, Stmt, Print, StmtExpression
 
 
 class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
+        self._environment = Environment()
 
     def interpret(self, statements: Iterable[Stmt]):
         try:
@@ -35,6 +37,9 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
             case TokenType.BANG:
                 return not self._is_truthy(right)
         return None
+
+    def visit_variable_expr(self, expr: VariableExpr):
+        return self._environment.get(expr.name)
 
     def visit_binary_expr(self, expr: Binary):
         left = self.evaluate(expr.left)
@@ -92,6 +97,15 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
     def visit_print_stmt(self, stmt: Print) -> None:
         value = self.evaluate(stmt.expression)
         self._stringify(value)
+        return None
+
+    def visit_var_stmt(self, stmt: Var) -> None:
+        # sets a variable to nil if it isn’t explicitly initialized
+        value = None
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+
+        self._environment.define(stmt.name.lexeme, value)
         return None
 
     def _is_truthy(self, obj) -> bool:
