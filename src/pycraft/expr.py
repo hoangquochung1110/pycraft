@@ -21,6 +21,12 @@ class ExprVisitor:
     def visit_grouping_expr(self, expr: "Grouping"):
         pass
 
+    def visit_assign_expr(self, expr: "Assign"):
+        pass
+
+    def visit_variable_expr(self, expr: "VariableExpr"):
+        pass
+
 
 class Literal(Expr):
 
