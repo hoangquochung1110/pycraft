@@ -16,3 +16,11 @@ class Environment:
             "Undefined variable '" + name.lexeme + "'.",
         )
 
+    def assign(self, name: Token, value):
+        if name.lexeme in self.values:
+            self.values[name.lexeme] = value
+            return
+        raise LoxRuntimeError(
+            name,
+            "Undefined variable '" + name.lexeme + "'.",
+        )  # new variable is not allowed

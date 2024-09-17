@@ -3,7 +3,16 @@ from typing import Iterable
 from .environment import Environment
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
-from .expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary, VariableExpr
+from .expr import (
+    Assign,
+    Binary,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Unary,
+    VariableExpr,
+)
 from .stmt import Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
@@ -107,6 +116,11 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
         self._environment.define(stmt.name.lexeme, value)
         return None
+
+    def visit_assign_expr(self, expr: Assign):
+        value = self.evaluate(expr.value)
+        self._environment.assign(expr.name, value)
+        return value
 
     def _is_truthy(self, obj) -> bool:
         """Lox follows Ruby's simple rule: false and nil are falsey,
