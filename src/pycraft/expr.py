@@ -51,6 +51,16 @@ class Unary(Expr):
         return visitor.visit_unary_expr(self)
 
 
+class Assign(Expr):
+
+    def __init__(self, name: Token, value: Expr):
+        self.name = name
+        self.value = value
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_assign_expr(self)
+
+
 class Binary(Expr):
 
     def __init__(self, left: Expr, operator: Token, right: Expr):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .errors import ParseError
-from .expr import Binary, Expr, Grouping, Literal, Unary, VariableExpr
+from .expr import Assign, Binary, Expr, Grouping, Literal, Unary, VariableExpr
 from .stmt import Print, Stmt, StmtExpression, Var
 from .tokenclass import Token, TokenType
 
@@ -37,6 +37,23 @@ class Parser:
 
         self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return Var(name, initializer)
+
+    def assignment(self) -> Expr:
+        # expression     → assignment ;
+        # assignment     → IDENTIFIER "=" assignment | equality ;
+        expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals: Token = self.previous()
+            value: Expr = self.assignment()
+
+            if isinstance(expr, VariableExpr):
+                name: Token = expr.name
+                return Assign(name, value)
+
+            self.__error(equals, "Invalid assignment target.")
+
+        return expr
 
     def expression_statement(self) -> Stmt:
         value = self.expression()
