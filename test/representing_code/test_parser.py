@@ -1,3 +1,5 @@
+import pytest
+
 from pycraft.error_handler import ErrorHandler
 from pycraft.parser import Parser
 from pycraft.tokenclass import Token, TokenType
@@ -12,4 +14,5 @@ def test_parser_throw_runtime_error():
         ],
         error_handler=ErrorHandler(),
     )
-    assert parser.parse() is None
+    with pytest.raises(RuntimeError):
+        parser.parse()
