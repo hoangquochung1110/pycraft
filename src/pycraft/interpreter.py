@@ -105,7 +105,7 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def visit_print_stmt(self, stmt: Print) -> None:
         value = self.evaluate(stmt.expression)
-        self._stringify(value)
+        print(self._stringify(value))
         return None
 
     def visit_var_stmt(self, stmt: Var) -> None:
