@@ -13,7 +13,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
-from .stmt import Print, Stmt, StmtExpression, StmtVisitor, Var
+from .stmt import Block, Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
 
@@ -98,6 +98,21 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def _execute(self, stmt: Stmt):
         stmt.accept(self)
+
+    def visit_block_stmt(self, stmt: "Block") -> None:
+        self.execute_block(stmt.statements, Environment(self._environment))
+        return None
+
+    def execute_block(self, statements: Iterable[Stmt], environment: Environment):
+        # to keep the interpreter simple, we inelegantly change
+        # and restore environment for each block
+        previous: Environment = self._environment
+        try:
+            self._environment = environment
+            for statement in statements:
+                self._execute(statement)
+        finally:
+            self._environment = previous
 
     def visit_expression_stmt(self, stmt: StmtExpression) -> None:
         self.evaluate(stmt.expression)

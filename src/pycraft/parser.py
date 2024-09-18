@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .errors import ParseError
 from .expr import Assign, Binary, Expr, Grouping, Literal, Unary, VariableExpr
-from .stmt import Print, Stmt, StmtExpression, Var
+from .stmt import Block, Print, Stmt, StmtExpression, Var
 from .tokenclass import Token, TokenType
 
 
@@ -20,8 +20,20 @@ class Parser:
         return statements
 
     def statement(self) -> Stmt:
+
+        """
+        statement      → exprStmt
+                        | printStmt
+                        | block ;
+
+        if the current token is LEFT_BRACE, it parses a block statement.
+        If the current token is PRINT, it parses a print statement.
+        If it's not a PRINT, it parses an expression statement.
+        """
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        if self.match(TokenType.LEFT_BRACE):
+            return Block(self.block())
         return self.expression_statement()
 
     def print_statement(self) -> Stmt:
@@ -59,6 +71,20 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return StmtExpression(value)
+
+    def block(self) -> list[Stmt]:
+        """
+        block          → "{" declaration* "}" ;
+        """
+        statements: list[Stmt] = []
+
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        # we'll reuse this method for parsing function bodies
+        # so let's return list of Stmt instead of a Block for now
+        return statements
 
     def expression(self) -> "Expr":
         return self.assignment()
