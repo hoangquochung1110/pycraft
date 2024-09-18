@@ -61,7 +61,7 @@ class Parser:
         return StmtExpression(value)
 
     def expression(self) -> "Expr":
-        return self.equality()
+        return self.assignment()
 
     def declaration(self) -> Stmt:
         try:

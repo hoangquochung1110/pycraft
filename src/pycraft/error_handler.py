@@ -1,3 +1,4 @@
+from .exception import LoxRuntimeError
 from .tokenclass import Token, TokenType
 
 
@@ -24,12 +25,13 @@ class ErrorHandler:
         if line:
             self.report(line, "", message)
 
-    def runtime_error(self, error: RuntimeError):
-        self.had_runtime_error = True
-        self.report(
-            line=error.token.line,
-            message=str(error),
+    def runtime_error(self, error: LoxRuntimeError):
+        report_str = (
+            "[line " + str(error.token.line) + "] "
+            "Error at '" + error.token.lexeme + "': " + str(error)
         )
+        print(report_str)
+        self.had_runtime_error = True
 
     def report(self, line: int, where: str, message: str):
         report_str = "[line " + str(line) + "] Error" + where + ": " + message
