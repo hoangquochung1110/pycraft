@@ -22,6 +22,8 @@ class Stmt(ABC):
     Subclasses should implement the specific behavior for different types of statements.
     """
 
+    def accept(self, visitor: StmtVisitor[R]) -> R: ...
+
 
 class Block(Stmt):
     def __init__(self, statements: list[Stmt]):
