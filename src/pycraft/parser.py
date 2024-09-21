@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .errors import ParseError
+from .exception import LoxRuntimeError
 from .expr import Assign, Binary, Expr, Grouping, Literal, Unary, VariableExpr
 from .stmt import Block, Print, Stmt, StmtExpression, Var
 from .tokenclass import Token, TokenType
@@ -171,7 +172,7 @@ class Parser:
 
     def __error(self, token: Token, message: str):
         self.error_handler.error(token=token, message=message)
-        return RuntimeError()
+        return LoxRuntimeError(token, message)
 
     def match(self, *token_types) -> bool:
         for token_type in token_types:
