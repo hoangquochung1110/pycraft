@@ -6,7 +6,6 @@ from .interpreter import Interpreter
 from .parser import Parser
 from .scanner import Scanner
 from .stmt import StmtExpression
-from .tokenclass import Token, TokenType
 
 
 
@@ -40,15 +39,14 @@ class Lox:
                     statements = parser.parse()
                 except LoxRuntimeError as exc:
                     sys.tracebacklimit = 0
-                    print(exc)
+                    self.error_handler.runtime_error(error=exc)
                 for stmt in statements:
                     if isinstance(stmt, StmtExpression):
                         try:
                             res = self._interpreter.evaluate(stmt.expression)
                         except LoxRuntimeError as exc:
                             sys.tracebacklimit = 0
-                            tokens = []
-                            print(exc)
+                            self.error_handler.runtime_error(error=exc)
                         else:
                             print(self._interpreter._stringify(res))
                     else:
@@ -56,8 +54,7 @@ class Lox:
                             self._interpreter._execute(stmt)
                         except LoxRuntimeError as exc:
                             sys.tracebacklimit = 0
-                            tokens = []
-                            print(exc)
+                            self.error_handler.runtime_error(error=exc)
 
         except EOFError:
             pass
