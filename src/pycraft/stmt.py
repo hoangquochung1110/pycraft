@@ -13,6 +13,7 @@ class StmtVisitor(Generic[R]):
     def visit_function_stmt(self, stmt: Function) -> R: ...
     def visit_var_stmt(self, stmt: Var) -> R: ...
     def visit_print_stmt(self, stmt: Print) -> R: ...
+    def visit_if_stmt(self, stmt: If) -> R: ...
 
 
 class Stmt(ABC):
@@ -39,6 +40,16 @@ class StmtExpression(Stmt):
 
     def accept(self, visitor: StmtVisitor[R]) -> R:
         return visitor.visit_expression_stmt(self)
+
+
+class If(Stmt):
+    def __init__(self, condition, then_branch, else_branch):
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+
+    def accept(self, visitor: StmtVisitor[R]) -> R:
+        return visitor.visit_if_stmt(self)
 
 
 class Function(Stmt):
