@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
@@ -116,6 +117,13 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def visit_expression_stmt(self, stmt: StmtExpression) -> None:
         self.evaluate(stmt.expression)
+        return None
+
+    def visit_if_stmt(self, stmt: "stmt.If") -> None:
+        if self._is_truthy(self.evaluate(stmt.condition)):
+            self._execute(stmt.then_branch)
+        elif stmt.else_branch is not None:
+            self._execute(stmt.then_branch)
         return None
 
     def visit_print_stmt(self, stmt: Print) -> None:

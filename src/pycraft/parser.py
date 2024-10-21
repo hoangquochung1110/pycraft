@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from . import stmt
 from .errors import ParseError
 from .exception import LoxRuntimeError
 from .expr import Assign, Binary, Expr, Grouping, Literal, Unary, VariableExpr
@@ -24,6 +25,7 @@ class Parser:
 
         """
         statement      → exprStmt
+                        | ifStmt
                         | printStmt
                         | block ;
 
@@ -31,11 +33,34 @@ class Parser:
         If the current token is PRINT, it parses a print statement.
         If it's not a PRINT, it parses an expression statement.
         """
+        if self.match(TokenType.IF):
+            return self.if_statement()
         if self.match(TokenType.PRINT):
             return self.print_statement()
         if self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
         return self.expression_statement()
+
+    def if_statement(self) -> Stmt:
+        """
+        ifStmt         → "if" "(" expression ")" statement
+                        ( "else" statement )? ;
+        """
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self.statement()
+        else_branch = None
+
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return stmt.If(
+            condition=condition,
+            then_branch=then_branch,
+            else_branch=else_branch,
+        )
 
     def print_statement(self) -> Stmt:
         value = self.expression()
