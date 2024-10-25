@@ -3,7 +3,16 @@ from __future__ import annotations
 from . import stmt
 from .errors import ParseError
 from .exception import LoxRuntimeError
-from .expr import Assign, Binary, Expr, Grouping, Literal, Unary, VariableExpr
+from .expr import (
+    Assign,
+    Binary,
+    Expr,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    VariableExpr,
+)
 from .stmt import Block, Print, Stmt, StmtExpression, Var
 from .tokenclass import Token, TokenType
 
@@ -78,8 +87,10 @@ class Parser:
 
     def assignment(self) -> Expr:
         # expression     → assignment ;
-        # assignment     → IDENTIFIER "=" assignment | equality ;
-        expr = self.equality()
+        # assignment     → IDENTIFIER "=" assignment | logic_or ;
+        # logic_or       → logic_and ( "or" logic_and )* ;
+        # logic_and      → equality ( "and" equality )* ;
+        expr = self._or()
 
         if self.match(TokenType.EQUAL):
             equals: Token = self.previous()
@@ -90,6 +101,26 @@ class Parser:
                 return Assign(name, value)
 
             self.__error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def _or(self) -> Expr:
+        expr = self._and()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self._and()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    def _and(self) -> Expr:
+        expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Logical(expr, operator, right)
 
         return expr
 

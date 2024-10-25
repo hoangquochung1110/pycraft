@@ -11,6 +11,7 @@ from .expr import (
     ExprVisitor,
     Grouping,
     Literal,
+    Logical,
     Unary,
     VariableExpr,
 )
@@ -33,6 +34,18 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def visit_literal_expr(self, expr: Literal):
         return expr.value
+
+    def visit_logical_expr(self, expr: Logical):
+        left = self.evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self._is_truthy(left):
+                return left
+        else:
+            if not self._is_truthy(left):
+                return left
+
+        return self.evaluate(expr.right)
 
     def visit_grouping_expr(self, expr: Grouping):
         return self.evaluate(expr.expression)
