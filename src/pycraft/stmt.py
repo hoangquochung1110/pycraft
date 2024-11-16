@@ -14,6 +14,7 @@ class StmtVisitor(Generic[R]):
     def visit_var_stmt(self, stmt: Var) -> R: ...
     def visit_print_stmt(self, stmt: Print) -> R: ...
     def visit_if_stmt(self, stmt: If) -> R: ...
+    def visit_while_stmt(self, stmt: While) -> R: ...
 
 
 class Stmt(ABC):
@@ -77,3 +78,12 @@ class Var(Stmt):
 
     def accept(self, visitor: StmtVisitor[R]) -> R:
         return visitor.visit_var_stmt(self)
+
+
+class While(Stmt):
+    def __init__(self, condition: "Expr", body: "Stmt"):
+        self.condition = condition
+        self.body = body
+
+    def accept(self, visitor: StmtVisitor[R]) -> R:
+        return visitor.visit_while_stmt(self)
