@@ -13,7 +13,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
-from .stmt import Block, Print, Stmt, StmtExpression, Var
+from .stmt import Block, Print, Stmt, StmtExpression, Var, While
 from .tokenclass import Token, TokenType
 
 
@@ -34,6 +34,7 @@ class Parser:
 
         """
         statement      → exprStmt
+                        | forStmt
                         | ifStmt
                         | printStmt
                         | block ;
@@ -42,6 +43,8 @@ class Parser:
         If the current token is PRINT, it parses a print statement.
         If it's not a PRINT, it parses an expression statement.
         """
+        if self.match(TokenType.FOR):
+            return self.for_statement()
         if self.match(TokenType.IF):
             return self.if_statement()
         if self.match(TokenType.PRINT):
@@ -51,6 +54,53 @@ class Parser:
         if self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
         return self.expression_statement()
+
+    def for_statement(self) -> Stmt:
+        """
+        forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                        expression? ";"
+                        expression? ")" statement ;
+        """
+        # for loop is simply a syntactic sugar for a while loop
+
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer: Stmt = None
+        if self.match(TokenType.SEMICOLON):
+            # If the token following the ( is a semicolon
+            # then the initializer has been omitted
+            initializer = None
+        elif self.match(TokenType.VAR):
+            # Otherwise, we check for a var keyword to see
+            # if it’s a variable declaration
+            initializer = self.var_declaration()
+        else:
+            # If neither of those matched, it must be an expression
+            initializer = self.expression_statement()
+
+        condition: Expr = None
+        if not self.check(TokenType.SEMICOLON):
+            condition = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment: Expr = None
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body: Stmt = self.statement()
+
+        if increment is not None:
+            body = Block([body, StmtExpression(increment)])
+
+        if condition is None:
+            condition = Literal(True)
+
+        body = While(condition, body)
+
+        if initializer is not None:
+            body = Block([initializer, body])
+        return body
 
     def if_statement(self) -> Stmt:
         """
