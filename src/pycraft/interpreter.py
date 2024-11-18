@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
 from .exception import LoxRuntimeError
@@ -10,6 +11,7 @@ from .expr import (
     ExprVisitor,
     Grouping,
     Literal,
+    Logical,
     Unary,
     VariableExpr,
 )
@@ -32,6 +34,18 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def visit_literal_expr(self, expr: Literal):
         return expr.value
+
+    def visit_logical_expr(self, expr: Logical):
+        left = self.evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self._is_truthy(left):
+                return left
+        else:
+            if not self._is_truthy(left):
+                return left
+
+        return self.evaluate(expr.right)
 
     def visit_grouping_expr(self, expr: Grouping):
         return self.evaluate(expr.expression)
@@ -118,6 +132,13 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         self.evaluate(stmt.expression)
         return None
 
+    def visit_if_stmt(self, stmt: "stmt.If") -> None:
+        if self._is_truthy(self.evaluate(stmt.condition)):
+            self._execute(stmt.then_branch)
+        elif stmt.else_branch is not None:
+            self._execute(stmt.then_branch)
+        return None
+
     def visit_print_stmt(self, stmt: Print) -> None:
         value = self.evaluate(stmt.expression)
         print(self._stringify(value))
@@ -131,6 +152,11 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
         self._environment.define(stmt.name.lexeme, value)
         return None
+
+    def visit_while_stmt(self, stmt: stmt.While) -> None:
+        while self._is_truthy(self.evaluate(stmt.condition)):
+            self.evaluate(stmt.body)
+        return
 
     def visit_assign_expr(self, expr: Assign):
         value = self.evaluate(expr.value)
