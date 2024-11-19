@@ -15,12 +15,14 @@ class Environment:
         # TODO: iteratively walk the chain instead for much faster
         if name.lexeme in self.values:
             value = self.values[name.lexeme]
-            if value:
+            if value is None:
+                raise LoxRuntimeError(
+                    name,
+                    f"{name.lexeme} is not initialized.",
+                )
+            else:
                 return value
-            raise LoxRuntimeError(
-                name,
-                f"{name.lexeme} is not initialized.",
-            )
+
         if self.enclosing is not None:
             return self.enclosing.get(name)
         raise LoxRuntimeError(
