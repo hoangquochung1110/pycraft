@@ -154,7 +154,7 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         return None
 
     def visit_while_stmt(self, stmt: stmt.While) -> None:
-        while self._is_truthy(stmt.condition):
+        while self._is_truthy(self.evaluate(stmt.condition)):
             self.evaluate(stmt.body)
         return
 
