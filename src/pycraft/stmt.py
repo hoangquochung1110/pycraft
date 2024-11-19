@@ -4,6 +4,7 @@ from abc import ABC
 from typing import Generic, TypeVar
 
 from .expr import Expr
+from .tokenclass import Token
 
 R = TypeVar('R')
 
@@ -15,6 +16,7 @@ class StmtVisitor(Generic[R]):
     def visit_print_stmt(self, stmt: Print) -> R: ...
     def visit_if_stmt(self, stmt: If) -> R: ...
     def visit_while_stmt(self, stmt: While) -> R: ...
+    def visit_break_stmt(self, stmt: Break) -> R: ...
 
 
 class Stmt(ABC):
@@ -72,7 +74,7 @@ class Print(Stmt):
 
 
 class Var(Stmt):
-    def __init__(self, name: str, initializer: Expr):
+    def __init__(self, name: "Token", initializer: Expr):
         self.name = name
         self.initializer = initializer
 
@@ -87,3 +89,9 @@ class While(Stmt):
 
     def accept(self, visitor: StmtVisitor[R]) -> R:
         return visitor.visit_while_stmt(self)
+
+
+class Break(Stmt):
+
+    def accept(self, visitor: StmtVisitor[R]) -> R:
+        return visitor.visit_break_stmt(self)
