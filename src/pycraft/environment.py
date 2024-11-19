@@ -14,12 +14,12 @@ class Environment:
     def get(self, name: Token):
         # TODO: iteratively walk the chain instead for much faster
         if name.lexeme in self.values:
-            try:
-                return self.values[name.lexeme]
-            except KeyError:
-                raise LoxRuntimeError(
-                    name,
-                    f"{name.lexeme} is not initialized.",
+            value = self.values[name.lexeme]
+            if value:
+                return value
+            raise LoxRuntimeError(
+                name,
+                f"{name.lexeme} is not initialized.",
             )
         if self.enclosing is not None:
             return self.enclosing.get(name)
