@@ -12,6 +12,7 @@ TokenType = Enum(
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR, \
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE, \
     EOF\
+    BREAK\
     "
 )
 
@@ -21,8 +22,8 @@ class Token:
     # Adding slots to minimize memory usage since we'll have a lot of tokens
     __slots__ = "type", "lexeme", "literal", "line"
 
-    def __init__(self, typ: TokenType, lexeme: str, literal: object | None, line: int):
-        self.type: TokenType = typ
+    def __init__(self, type: TokenType, lexeme: str, literal: object | None, line: int):
+        self.type: TokenType = type
         self.lexeme: str = lexeme
         self.literal: object | None = literal
         self.line: int = line  # TODO: more precise column, line
