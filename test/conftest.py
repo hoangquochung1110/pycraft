@@ -12,12 +12,7 @@ def lox():
 
 
 @pytest.fixture
-def error_handler(lox):
-    return lox.error_handler
-
-
-@pytest.fixture
-def parser(error_handler):
+def parser(lox):
     parser = Parser(tokens=[], error_handler=lox.error_handler)
     yield parser
     del parser
