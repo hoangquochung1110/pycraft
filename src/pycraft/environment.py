@@ -3,10 +3,10 @@ from .exception import LoxRuntimeError
 
 
 class Environment:
-    values = dict()
 
     def __init__(self, enclosing: "Environment"=None):
         self.enclosing = enclosing
+        self.values = {}
 
     def define(self, name, value):
         self.values[name] = value
