@@ -1,9 +1,9 @@
 from .expr import Assign, Binary, Expr, ExprVisitor, Grouping, Literal, Unary
-from .stmt import Block, If, Print, Stmt, StmtExpression, StmtVisitor, Var
+from .stmt import Block, If, Print, Stmt, StmtExpression, StmtVisitor, Var, While
 from .tokenclass import Token
 
 
-class ASTPrinter(ExprVisitor, StmtVisitor):
+class ASTPrinter(ExprVisitor[str], StmtVisitor[str]):
 
     def print(self, obj) -> str:
         if isinstance(obj, Expr):
