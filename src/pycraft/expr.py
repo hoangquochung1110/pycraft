@@ -12,6 +12,9 @@ class ExprVisitor:
     def visit_literal_expr(self, expr: "Literal"):
         pass
 
+    def visit_logical_expr(self, expr: "Logical"):
+        pass
+
     def visit_unary_expr(self, expr: "Unary"):
         pass
 
@@ -35,6 +38,17 @@ class Literal(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_literal_expr(self)
+
+
+class Logical(Expr):
+
+    def __init__(self, left: Expr, operator: Token, right: Expr):
+        self.left = left
+        self.operator = operator
+        self.right = right
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_logical_expr(self)
 
 
 class Grouping(Expr):

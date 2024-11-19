@@ -3,10 +3,10 @@ from .exception import LoxRuntimeError
 
 
 class Environment:
-    values = dict()
 
     def __init__(self, enclosing: "Environment"=None):
         self.enclosing = enclosing
+        self.values = {}
 
     def define(self, name, value):
         self.values[name] = value
@@ -15,12 +15,14 @@ class Environment:
         # TODO: iteratively walk the chain instead for much faster
         if name.lexeme in self.values:
             value = self.values[name.lexeme]
-            if value:
+            if value is None:
+                raise LoxRuntimeError(
+                    name,
+                    f"{name.lexeme} is not initialized.",
+                )
+            else:
                 return value
-            raise LoxRuntimeError(
-                name,
-                f"{name.lexeme} is not initialized.",
-            )
+
         if self.enclosing is not None:
             return self.enclosing.get(name)
         raise LoxRuntimeError(
