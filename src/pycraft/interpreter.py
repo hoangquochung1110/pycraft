@@ -3,7 +3,7 @@ from typing import Iterable
 from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
-from .exception import LoxRuntimeError
+from .exception import BreakException, LoxRuntimeError
 from .expr import (
     Assign,
     Binary,
@@ -155,8 +155,14 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def visit_while_stmt(self, stmt: stmt.While) -> None:
         while self._is_truthy(self.evaluate(stmt.condition)):
-            self.evaluate(stmt.body)
+            try:
+                self.evaluate(stmt.body)
+            except BreakException:
+                break
         return
+
+    def visit_break_stmt(self, stmt: stmt.Break) -> None:
+        raise BreakException()
 
     def visit_assign_expr(self, expr: Assign):
         value = self.evaluate(expr.value)

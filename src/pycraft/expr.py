@@ -1,5 +1,8 @@
+from typing import Generic, TypeVar
+
 from .tokenclass import Token
 
+R = TypeVar('R')
 
 class Expr:
 
@@ -7,28 +10,15 @@ class Expr:
         return NotImplemented()
 
 
-class ExprVisitor:
+class ExprVisitor(Generic[R]):
 
-    def visit_literal_expr(self, expr: "Literal"):
-        pass
-
-    def visit_logical_expr(self, expr: "Logical"):
-        pass
-
-    def visit_unary_expr(self, expr: "Unary"):
-        pass
-
-    def visit_binary_expr(self, expr: "Binary"):
-        pass
-
-    def visit_grouping_expr(self, expr: "Grouping"):
-        pass
-
-    def visit_assign_expr(self, expr: "Assign"):
-        pass
-
-    def visit_variable_expr(self, expr: "VariableExpr"):
-        pass
+    def visit_literal_expr(self, expr: "Literal") -> R: ...
+    def visit_logical_expr(self, expr: "Logical") -> R: ...
+    def visit_unary_expr(self, expr: "Unary") -> R: ...
+    def visit_binary_expr(self, expr: "Binary") -> R: ...
+    def visit_grouping_expr(self, expr: "Grouping") -> R: ...
+    def visit_assign_expr(self, expr: "Assign") -> R: ...
+    def visit_variable_expr(self, expr: "VariableExpr") -> R: ...
 
 
 class Literal(Expr):

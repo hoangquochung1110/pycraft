@@ -37,7 +37,8 @@ class Parser:
                         | forStmt
                         | ifStmt
                         | printStmt
-                        | block ;
+                        | block
+                        | break;
 
         if the current token is LEFT_BRACE, it parses a block statement.
         If the current token is PRINT, it parses a print statement.
@@ -53,6 +54,8 @@ class Parser:
             return self.while_statement()
         if self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
+        if self.match(TokenType.BREAK):
+            return self.break_statement()
         return self.expression_statement()
 
     def for_statement(self) -> Stmt:
@@ -101,6 +104,10 @@ class Parser:
         if initializer is not None:
             body = Block([initializer, body])
         return body
+
+    def break_statement(self) -> Stmt:
+        self.consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
+        return stmt.Break()
 
     def if_statement(self) -> Stmt:
         """
