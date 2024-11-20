@@ -1,5 +1,23 @@
-from .expr import Assign, Binary, Expr, ExprVisitor, Grouping, Literal, Unary
-from .stmt import Block, If, Print, Stmt, StmtExpression, StmtVisitor, Var, While
+from .expr import (
+    Assign,
+    Binary,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Unary,
+    VariableExpr,
+)
+from .stmt import (
+    Block,
+    If,
+    Print,
+    Stmt,
+    StmtExpression,
+    StmtVisitor,
+    Var,
+    While
+)
 from .tokenclass import Token
 
 
@@ -63,6 +81,9 @@ class ASTPrinter(ExprVisitor[str], StmtVisitor[str]):
 
     def visit_unary_expr(self, expr: "Unary"):
         return self.parenthesize(expr.operator.lexeme, expr.right)
+
+    def visit_variable_expr(self, expr: VariableExpr) -> str:
+        return expr.name.lexeme
 
     def visit_grouping_expr(self, expr: "Grouping"):
         return self.parenthesize("group", expr.expression)
