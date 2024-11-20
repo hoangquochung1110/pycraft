@@ -10,13 +10,15 @@ from .expr import (
 )
 from .stmt import (
     Block,
+    Break,
+    Function,
     If,
     Print,
     Stmt,
     StmtExpression,
     StmtVisitor,
     Var,
-    While
+    While,
 )
 from .tokenclass import Token
 
@@ -52,6 +54,9 @@ class ASTPrinter(ExprVisitor[str], StmtVisitor[str]):
             stmt.else_branch
         )
 
+    def visit_function_stmt(self, stmt: "Function"):
+        raise NotImplementedError
+
     def visit_print_stmt(self, stmt: Print):
         return self.parenthesize("print", *[stmt.expression])
 
@@ -67,6 +72,9 @@ class ASTPrinter(ExprVisitor[str], StmtVisitor[str]):
 
     def visit_while_stmt(self, stmt: "While"):
         return self.parenthesize2("while", stmt.condition, stmt.body)
+
+    def visit_break_stmt(self, stmt: Break) -> str:
+        raise NotImplementedError
 
     def visit_assign_expr(self, expr: Assign):
         return self.parenthesize2("=", expr.name.lexeme, expr.value)
