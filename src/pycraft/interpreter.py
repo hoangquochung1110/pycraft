@@ -7,6 +7,7 @@ from .exception import BreakException, LoxRuntimeError
 from .expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     ExprVisitor,
     Grouping,
@@ -15,6 +16,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
+from .lox_callable import LoxCallable
 from .stmt import Block, Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
@@ -103,6 +105,16 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
                 return float(left) <= float(right)
             case TokenType.BANG_EQUAL: return not self._is_equal(left, right)
             case TokenType.EQUAL_EQUAL: return self._is_equal(left, right)
+
+    def visit_call_expr(self, expr: Call):
+        callee = self.evaluate(expr.callee)
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+
+        function: LoxCallable = callee
+        return function(self, arguments)
 
     def evaluate(self, expr: Expr):
         """Helper method to send the expr back

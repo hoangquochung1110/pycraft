@@ -6,6 +6,7 @@ from .exception import LoxRuntimeError
 from .expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     Grouping,
     Literal,
@@ -272,7 +273,35 @@ class Parser:
             operator = self.previous()
             right = self.unary()
             return Unary(operator, right)
-        return self.primary()
+        return self.call()
+
+    def call(self) -> Expr:
+        expr = self.primary()
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finish_call(expr)
+            else:
+                break
+        return expr
+
+    def finish_call(self, callee: Expr) -> Expr:
+        arguments: list[Expr] = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) >= 255:
+                    self.__error(
+                        self.peek(),
+                        "Can't have more than 255 arguments."
+                    )
+                arguments.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        paren = self.consume(
+            TokenType.RIGHT_PAREN,
+            "Expect ')' after arguments.",
+        )
+        return Call(callee, paren, arguments)
 
     def primary(self) -> "Expr":
         if self.match(TokenType.FALSE):
