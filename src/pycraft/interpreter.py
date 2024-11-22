@@ -113,6 +113,9 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         for argument in expr.arguments:
             arguments.append(self.evaluate(argument))
 
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
         function: LoxCallable = callee
         return function(self, arguments)
 
