@@ -14,7 +14,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
-from .stmt import Block, Print, Stmt, StmtExpression, Var, While
+from .stmt import Block, Function, Print, Stmt, StmtExpression, Var, While
 from .tokenclass import Token, TokenType
 
 
@@ -197,6 +197,31 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return StmtExpression(value)
 
+    def function(self, kind: str) -> Stmt:
+        name = self.consume(TokenType.IDENTIFIER, "Expect " + kind + " name.")
+        self.consume(
+            TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name."
+        )
+        parameters = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    self.__error(
+                        self.peek(),
+                        "Can't have more than 255 parameters."
+                    )
+                parameters.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                if not self.match(TokenType.COMMA):
+                    break
+
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self.consume(
+            TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body."
+        )
+        body = self.block()
+        return Function(name, parameters, body)
+
     def block(self) -> list[Stmt]:
         """
         block          → "{" declaration* "}" ;
@@ -215,7 +240,14 @@ class Parser:
         return self.assignment()
 
     def declaration(self) -> Stmt:
+        """
+        declaration    → funDecl
+                        | varDecl
+                        | statement ;
+        """
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
             if self.match(TokenType.VAR):
                 return self.var_declaration()
             return self.statement()
