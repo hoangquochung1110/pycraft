@@ -56,7 +56,7 @@ class If(Stmt):
 
 
 class Function(Stmt):
-    def __init__(self, name: str, params: list[str], body: list[Stmt]):
+    def __init__(self, name: Token, params: list[Token], body: list[Stmt]):
         self.name = name
         self.params = params
         self.body = body

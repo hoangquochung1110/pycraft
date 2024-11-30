@@ -1,5 +1,5 @@
 from typing import Iterable
-
+import time
 from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
@@ -7,6 +7,7 @@ from .exception import BreakException, LoxRuntimeError
 from .expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     ExprVisitor,
     Grouping,
@@ -15,6 +16,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
+from .lox_callable import LoxCallable
 from .stmt import Block, Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
@@ -23,7 +25,15 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
-        self._environment = Environment()
+        # holds a fixed reference to the outermost global environment.
+        self._globals = Environment()
+        # The environment field in the interpreter changes as we enter and exit local scopes
+        self._environment = self._globals
+
+        self._globals.define("clock", type("clock", (LoxCallable,), {
+        'arity': lambda self: 0,  # Example implementation of arity
+        '__call__': lambda self, interpreter, arguments: time.time()
+    })())
 
     def interpret(self, statements: Iterable[Stmt]):
         try:
@@ -103,6 +113,23 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
                 return float(left) <= float(right)
             case TokenType.BANG_EQUAL: return not self._is_equal(left, right)
             case TokenType.EQUAL_EQUAL: return self._is_equal(left, right)
+
+    def visit_call_expr(self, expr: Call):
+        callee = self.evaluate(expr.callee)
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        function: LoxCallable = callee
+        if len(arguments) != function.arity():
+            raise LoxRuntimeError(
+                expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}."
+            )
+
+        return function(self, arguments)
 
     def evaluate(self, expr: Expr):
         """Helper method to send the expr back

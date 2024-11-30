@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, Iterable, TypeVar
 
 from .tokenclass import Token
 
@@ -19,6 +19,7 @@ class ExprVisitor(Generic[R]):
     def visit_grouping_expr(self, expr: "Grouping") -> R: ...
     def visit_assign_expr(self, expr: "Assign") -> R: ...
     def visit_variable_expr(self, expr: "VariableExpr") -> R: ...
+    def visit_call_expr(self, expr: "Call") -> R: ...
 
 
 class Literal(Expr):
@@ -89,3 +90,19 @@ class VariableExpr(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_variable_expr(self)
+
+
+class Call(Expr):
+
+    def __init__(
+        self,
+        callee: "Expr",
+        paren: "Token",
+        arguments: Iterable["Expr"],
+    ) -> None:
+        self.callee = callee
+        self.paren = paren
+        self.arguments = arguments
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_call_expr(self)
