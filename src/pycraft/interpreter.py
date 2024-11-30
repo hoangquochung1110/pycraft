@@ -117,6 +117,11 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
             raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
 
         function: LoxCallable = callee
+        if len(arguments) != function.arity():
+            raise LoxRuntimeError(
+                expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}."
+            )
+
         return function(self, arguments)
 
     def evaluate(self, expr: Expr):
