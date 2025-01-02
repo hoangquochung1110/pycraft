@@ -17,6 +17,7 @@ from .expr import (
     VariableExpr,
 )
 from .lox_callable import LoxCallable
+from .lox_function import LoxFunction
 from .stmt import Block, Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
@@ -159,6 +160,11 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         self.evaluate(stmt.expression)
         return None
 
+    def visit_function_stmt(self, stmt: stmt.Function) -> None:
+        function = LoxFunction(stmt)
+        self._environment.define(stmt.name.lexeme, function)
+        return None
+
     def visit_if_stmt(self, stmt: "stmt.If") -> None:
         if self._is_truthy(self.evaluate(stmt.condition)):
             self._execute(stmt.then_branch)
@@ -222,6 +228,8 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
             if text.endswith(".0"):
                 text = text[:-2]
             return text
+        if isinstance(obj, LoxFunction):
+            return obj.to_string()
         return str(obj)
 
     def _check_number_operand(self, operator, operand):
