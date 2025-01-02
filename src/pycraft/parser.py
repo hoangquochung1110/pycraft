@@ -14,7 +14,7 @@ from .expr import (
     Unary,
     VariableExpr,
 )
-from .stmt import Block, Function, Print, Stmt, StmtExpression, Var, While
+from .stmt import Block, Function, Print, Return, Stmt, StmtExpression, Var, While
 from .tokenclass import Token, TokenType
 
 
@@ -41,6 +41,8 @@ class Parser:
                         | block
                         | break;
 
+        returnStmt     → "return" expression? ";" ;
+
         if the current token is LEFT_BRACE, it parses a block statement.
         If the current token is PRINT, it parses a print statement.
         If it's not a PRINT, it parses an expression statement.
@@ -51,6 +53,8 @@ class Parser:
             return self.if_statement()
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
         if self.match(TokenType.WHILE):
             return self.while_statement()
         if self.match(TokenType.LEFT_BRACE):
@@ -135,6 +139,14 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)
+
+    def return_statement(self) -> Stmt:
+        keyword: Token = self.previous()
+        value: Expr = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(keyword, value)
 
     def var_declaration(self) -> Stmt:
         name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")

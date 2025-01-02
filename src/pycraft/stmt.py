@@ -17,6 +17,7 @@ class StmtVisitor(Generic[R]):
     def visit_if_stmt(self, stmt: If) -> R: ...
     def visit_while_stmt(self, stmt: While) -> R: ...
     def visit_break_stmt(self, stmt: Break) -> R: ...
+    def visit_return_stmt(self, stmt: Return) -> R: ...
 
 
 class Stmt(ABC):
@@ -95,3 +96,12 @@ class Break(Stmt):
 
     def accept(self, visitor: StmtVisitor[R]) -> R:
         return visitor.visit_break_stmt(self)
+
+
+class Return(Stmt):
+    def __init__(self, keyword: Token, value: Expr):
+        self.keyword = keyword
+        self.value = value
+
+    def accept(self, visitor: StmtVisitor[R]) -> R:
+        return visitor.visit_return_stmt(self)

@@ -3,7 +3,7 @@ import time
 from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
-from .exception import BreakException, LoxRuntimeError
+from .exception import BreakException, LoxRuntimeError, ReturnException
 from .expr import (
     Assign,
     Binary,
@@ -176,6 +176,15 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         value = self.evaluate(stmt.expression)
         print(self._stringify(value))
         return None
+
+    def visit_return_stmt(self, stmt: stmt.Return) -> None:
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+        # use an exception to unwind the interpreter past the visit methods
+        # of all of the containing statements back to the code
+        # that began executing the body
+        raise ReturnException(value=value)
 
     def visit_var_stmt(self, stmt: Var) -> None:
         # sets a variable to nil if it isn’t explicitly initialized

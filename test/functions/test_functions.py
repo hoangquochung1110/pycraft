@@ -37,23 +37,10 @@ def test_clock(lox, capsys):
     assert output != '\n'
 
 
-# def test_clock(lox, capsys, monkeypatch):
-#     # Mock the input function to return test inputs and then raise EOFError
-#     inputs = iter(['clock()'])
-#     def mock_input(_):
-#         try:
-#             return next(inputs)
-#         except StopIteration:
-#             raise EOFError()
-
-#     monkeypatch.setattr('builtins.input', mock_input)
-
-#     # Run the prompt
-#     lox.run_prompt()
-
-#     # Check the output
-#     captured = capsys.readouterr()
-#     assert captured.err == ''
+def test_return_statements(lox, capsys):
+    lox.run_file('./test/functions/return_statements.lox')
+    captured = capsys.readouterr()
+    assert captured.out == "0\n1\n1\n2\n"
 
 
 def test_print_function_object(lox, capsys):

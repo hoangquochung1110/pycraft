@@ -1,3 +1,4 @@
+from .exception import ReturnException
 from .lox_callable import LoxCallable
 from .environment import Environment
 
@@ -16,8 +17,12 @@ class LoxFunction(LoxCallable):
                 arguments[i],
             )
 
-        interpreter.execute_block(self.declaration.body, environment)
-        return None
+        try:
+            interpreter.execute_block(self.declaration.body, environment)
+        except ReturnException as exc:
+            return exc.value
+        else:
+            return None
 
     def arity(self) -> int:
         return len(self.declaration.params)

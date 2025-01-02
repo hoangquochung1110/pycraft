@@ -7,3 +7,10 @@ class LoxRuntimeError(RuntimeError):
 
 class BreakException(Exception):
     pass
+
+
+class ReturnException(RuntimeError):
+
+    def __init__(self, value, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.value = value
