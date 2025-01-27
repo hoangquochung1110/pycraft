@@ -1,12 +1,13 @@
 from typing import Iterable
-
+import time
 from . import stmt
 from .environment import Environment
 from .error_handler import ErrorHandler
-from .exception import BreakException, LoxRuntimeError
+from .exception import BreakException, LoxRuntimeError, ReturnException
 from .expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     ExprVisitor,
     Grouping,
@@ -15,6 +16,8 @@ from .expr import (
     Unary,
     VariableExpr,
 )
+from .lox_callable import LoxCallable
+from .lox_function import LoxFunction
 from .stmt import Block, Print, Stmt, StmtExpression, StmtVisitor, Var
 from .tokenclass import TokenType
 
@@ -23,7 +26,15 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
 
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
-        self._environment = Environment()
+        # holds a fixed reference to the outermost global environment.
+        self._globals = Environment()
+        # The environment field in the interpreter changes as we enter and exit local scopes
+        self._environment = self._globals
+
+        self._globals.define("clock", type("clock", (LoxCallable,), {
+        'arity': lambda self: 0,  # Example implementation of arity
+        '__call__': lambda self, interpreter, arguments: time.time()
+    })())
 
     def interpret(self, statements: Iterable[Stmt]):
         try:
@@ -104,6 +115,23 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
             case TokenType.BANG_EQUAL: return not self._is_equal(left, right)
             case TokenType.EQUAL_EQUAL: return self._is_equal(left, right)
 
+    def visit_call_expr(self, expr: Call):
+        callee = self.evaluate(expr.callee)
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        function: LoxCallable = callee
+        if len(arguments) != function.arity():
+            raise LoxRuntimeError(
+                expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}."
+            )
+
+        return function(self, arguments)
+
     def evaluate(self, expr: Expr):
         """Helper method to send the expr back
 
@@ -132,6 +160,11 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         self.evaluate(stmt.expression)
         return None
 
+    def visit_function_stmt(self, stmt: stmt.Function) -> None:
+        function = LoxFunction(stmt)
+        self._environment.define(stmt.name.lexeme, function)
+        return None
+
     def visit_if_stmt(self, stmt: "stmt.If") -> None:
         if self._is_truthy(self.evaluate(stmt.condition)):
             self._execute(stmt.then_branch)
@@ -143,6 +176,15 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
         value = self.evaluate(stmt.expression)
         print(self._stringify(value))
         return None
+
+    def visit_return_stmt(self, stmt: stmt.Return) -> None:
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+        # use an exception to unwind the interpreter past the visit methods
+        # of all of the containing statements back to the code
+        # that began executing the body
+        raise ReturnException(value=value)
 
     def visit_var_stmt(self, stmt: Var) -> None:
         # sets a variable to nil if it isn’t explicitly initialized
@@ -195,6 +237,8 @@ class Interpreter(ExprVisitor, StmtVisitor[None]):
             if text.endswith(".0"):
                 text = text[:-2]
             return text
+        if isinstance(obj, LoxFunction):
+            return obj.to_string()
         return str(obj)
 
     def _check_number_operand(self, operator, operand):
